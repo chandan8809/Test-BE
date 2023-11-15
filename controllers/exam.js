@@ -14,6 +14,8 @@ const examList = async(req,res) => {
     res.status(StatusCodes.OK).json({quiz})
 } 
 
+
+
 const startExam = async(req,res) => {
     const quizId= req.params.quiz_id
     const quiz = await Question.findById(quizId,{'section_list.answer': 0,createdAt:0,createdBy:0,updatedAt:0})
@@ -48,8 +50,9 @@ const submitExam = async(req,res) => {
           if (section) {
             const answers = attempt.answer;
             const correctAnswers = section.answer;
+            console.log("section",correctAnswers)
             let section_marks = 0;
-            let section_total_marks= Object.keys(correctAnswer).length
+            let section_total_marks= Object.keys(correctAnswers).length
             // Compare attempted answers with correct answers
             Object.keys(answers).forEach(questionId => {
               if (answers[questionId] === correctAnswers[questionId]) {
@@ -82,7 +85,27 @@ const submitExam = async(req,res) => {
         section_mark:sectionMarks
     })
 
-    res.status(200).json({report})
+    res.status(200).json({report_id:report._id})
 } 
 
-module.exports={startExam, submitExam, examList}
+const reportsList = async(req,res) => {
+    const report = await Report.find()
+
+    if(!report){
+        throw new BadRequestError("exam not found")
+    }
+    res.status(StatusCodes.OK).json({report})
+} 
+
+const getReport = async(req,res) => {
+    const reportId= req.params.report_id
+
+    const report = await Report.findById(reportId)
+    if(!report){
+        throw new BadRequestError("report not found")
+    }
+    res.status(StatusCodes.OK).json({report})
+} 
+
+
+module.exports={startExam, submitExam, examList ,reportsList, getReport}
